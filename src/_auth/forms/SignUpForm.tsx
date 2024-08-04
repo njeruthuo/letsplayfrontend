@@ -14,6 +14,7 @@ import {
 import { useUserContext } from "@/lib/context/authContext/UserContext";
 import { useToast } from "@/components/ui/use-toast";
 import { Link } from "react-router-dom";
+import { createUserAccount } from "@/lib/actions/createUser";
 
 const formSchema = z.object({
   username: z.string().min(2, {
@@ -43,8 +44,9 @@ const SignUpForm = () => {
   });
 
   // 2. Define a submit handler.
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     // Do something with the form values.
+    const response = await createUserAccount(values);
     dispatch({ type: "CREATE_USER", payload: values });
     // ✅ This will be type-safe and validated.
     // console.log(values);
@@ -53,6 +55,7 @@ const SignUpForm = () => {
       title: "Success!",
       description: "Your account was created successfully.",
     });
+    return response
   }
   return (
     <section className="">

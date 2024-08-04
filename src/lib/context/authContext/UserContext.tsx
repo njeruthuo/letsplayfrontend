@@ -10,15 +10,7 @@ export const useUserContext = () => useContext(UserContextProvider);
 function reducer(state, action) {
   switch (action.type) {
     case "CREATE_USER":
-      createUserAccount(action.payload);
-
       return { ...state, user: action.payload };
-      break;
-
-    // case "LOGIN_USER":
-    //   loginUser(action.payload);
-    //   return { ...state, isAuthenticated: true };
-    //   break;
 
     default:
       throw Error("Unknown action specified!");
@@ -27,8 +19,6 @@ function reducer(state, action) {
 
 const UserContext = ({ children }) => {
   const [state, dispatch] = useReducer(reducer, store);
-
-  console.log(state);
 
   return (
     <UserContextProvider.Provider value={{ state, dispatch }}>
