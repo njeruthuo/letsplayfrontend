@@ -15,6 +15,7 @@ import { useUserContext } from "@/lib/context/authContext/UserContext";
 import { useToast } from "@/components/ui/use-toast";
 import { Link } from "react-router-dom";
 import { createUserAccount } from "@/lib/actions/createUser";
+import Loader from "@/components/shared/Loader";
 
 const formSchema = z.object({
   username: z.string().min(2, {
@@ -45,18 +46,23 @@ const SignUpForm = () => {
 
   // 2. Define a submit handler.
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    dispatch({ type: "LOAD_ON_CREATE_USER" });
     // Do something with the form values.
     const response = await createUserAccount(values);
     dispatch({ type: "CREATE_USER", payload: values });
     // ✅ This will be type-safe and validated.
     // console.log(values);
+    dispatch({ type: "LOAD_ON_CREATE_USER" });
 
     toast({
       title: "Success!",
       description: "Your account was created successfully.",
     });
-    return response
+    form.reset();
+    window.location.replace("/sign-in");
+    return response;
   }
+
   return (
     <section className="">
       <Form {...form}>
@@ -131,7 +137,14 @@ const SignUpForm = () => {
             )}
           />
           <Button className="w-full" type="submit">
-            Create account
+            {/* Create account */}
+            {state.isCreateAccountLoading ? (
+              <div className="flex gap-2">
+                <Loader /> Loading...
+              </div>
+            ) : (
+              "Sign Up"
+            )}
           </Button>
         </form>
         <p className="text-pear">

@@ -14,6 +14,8 @@ import {
 import { useUserContext } from "@/lib/context/authContext/UserContext";
 import { useToast } from "@/components/ui/use-toast";
 import { Link } from "react-router-dom";
+import Loader from "@/components/shared/Loader";
+import { loginUser } from "@/lib/actions/loginUser";
 
 const formSchema = z.object({
   username: z.string().min(2, {
@@ -37,16 +39,33 @@ const SignInForm = () => {
   });
 
   // 2. Define a submit handler.
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     // Do something with the form values.
-    dispatch({ type: "LOGIN_USER", payload: values });
+    dispatch({ type: "LOAD_ON_LOGIN_USER" });
     // ✅ This will be type-safe and validated.
     // console.log(values);
 
-    toast({
-      title: "Login successful!",
-    });
+    try {
+      const userData = await loginUser(values);
+      // Do something with the user data
+
+      dispatch({ type: "CREATE_USER_SESSION", payload: userData });
+      dispatch({ type: "LOAD_ON_LOGIN_USER" });
+
+      toast({
+        title: "Login successful!",
+      });
+    } catch (error) {
+      dispatch({ type: "LOAD_ON_LOGIN_USER" });
+      toast({
+        title: "Login failed!",
+        description: "Username or password incorrect",
+        variant: "destructive",
+      });
+      return error;
+    }
   }
+
   return (
     <section className="">
       <Form {...form}>
@@ -80,7 +99,13 @@ const SignInForm = () => {
           />
 
           <Button className="w-full" type="submit">
-            Sign in
+            {state.isLoginLoading ? (
+              <div className="flex gap-2">
+                <Loader /> Signing in...
+              </div>
+            ) : (
+              "Sign in"
+            )}
           </Button>
         </form>
         <p className="text-xanthous">

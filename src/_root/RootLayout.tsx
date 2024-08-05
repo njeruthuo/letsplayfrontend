@@ -7,11 +7,15 @@ const RootLayout = () => {
   const { state } = useUserContext();
   return (
     <>
-      {state.isAuthenticated ? (
-        <section>
-          <Navbar />
+      {state.isAuthenticated ? ( // add a user to not be null as a condition to go to homepage
+        <section className="min-h-screen relative">
+          <div className="bg-silver">
+            <Navbar />
+          </div>
           <Outlet />
-          <Footer />
+          <div className="bg-silver absolute bottom-0 w-full">
+            <Footer />
+          </div>
         </section>
       ) : (
         <Navigate to={"/sign-in"} />

@@ -1,6 +1,4 @@
 import { store } from "./store";
-import { createUserAccount } from "@/lib/actions/createUser";
-// import { loginUser } from "@/lib/actions/loginUser";
 import { createContext, useContext, useReducer } from "react";
 
 const UserContextProvider = createContext(undefined);
@@ -11,6 +9,24 @@ function reducer(state, action) {
   switch (action.type) {
     case "CREATE_USER":
       return { ...state, user: action.payload };
+
+    case "LOAD_ON_CREATE_USER":
+      return {
+        ...state,
+        isCreateAccountLoading: !state.isCreateAccountLoading,
+      };
+
+    case "CREATE_USER_SESSION":
+      return { ...state, isAuthenticated: true, user: action.payload };
+
+    case "DELETE_USER_SESSION":
+      return { ...state, user: {}, isAuthenticated: false };
+
+    case "LOAD_ON_LOGIN_USER":
+      return {
+        ...state,
+        isLoginLoading: !state.isLoginLoading,
+      };
 
     default:
       throw Error("Unknown action specified!");

@@ -1,7 +1,8 @@
 export const store = {
-  isAuthenticated: false,
+  isAuthenticated: true,
   isCreateAccountLoading: false,
   isLoginLoading: false,
+  loginError: false,
   user: {},
-  
+  user_profile: {},
 };
