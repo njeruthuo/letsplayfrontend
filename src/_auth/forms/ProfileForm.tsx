@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -14,27 +13,33 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useUserContext } from "@/lib/context/authContext/UserContext";
+import {
+  CREATE_USER_PROFILE,
+  LOAD_ON_PROFILE_UPDATE,
+} from "@/lib/context/authContext/actions";
+import { createProfile } from "@/lib/actions/createProfile";
+import Loader from "@/components/shared/Loader";
 
 const formSchema = z.object({
   dob: z.string().min(2, {
     message: "Username must be at least 2 characters.",
   }),
-  bio: z.string().min(2, {
-    message: "Username must be at least 2 characters.",
+  bio: z.string().min(10, {
+    message: "Bio must be at least 10 characters.",
   }),
-  location: z.string().min(2, {
-    message: "Username must be at least 2 characters.",
+  location: z.string().min(1, {
+    message: "Location cannot be empty.",
   }),
-  gender: z.string().min(2, {
-    message: "Username must be at least 2 characters.",
+  gender: z.string().min(1, {
+    message: "Gender must be chosen.",
   }),
-  phone: z.string().min(2, {
-    message: "Username must be at least 2 characters.",
+  phone: z.string().min(10, {
+    message: "Phone must be at least 10 characters.",
   }),
 });
 
 const ProfileForm = () => {
-  const { state } = useUserContext();
+  const { state, dispatch } = useUserContext();
   // 1. Define your form.
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -42,20 +47,32 @@ const ProfileForm = () => {
       bio: state.user_profile.bio,
       dob: state.user_profile.dob,
       location: state.user_profile.location,
-      gender: state.user_profile.gender,
+      gender: "",
       phone: state.user_profile.phone,
     },
   });
 
   // 2. Define a submit handler.
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    dispatch({ type: LOAD_ON_PROFILE_UPDATE });
+
     console.log(values);
+    try {
+      const profileData = await createProfile({
+        ...values,
+        user: state.user.id,
+      });
+
+      dispatch({ type: CREATE_USER_PROFILE, payload: profileData?.data });
+    } catch (error) {
+      console.log(error);
+    }
+
+    dispatch({ type: LOAD_ON_PROFILE_UPDATE });
   }
+
   return (
     <div className="mx-auto w-3/5">
-      
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
           <FormField
@@ -127,7 +144,12 @@ const ProfileForm = () => {
               </FormItem>
             )}
           />
-          <Button className="w-full" type="submit">Submit</Button>
+          <Button className="w-full" type="submit">
+            {state.isUpdatingProfile ? <Loader /> : ""}
+            {state.user_profile.dob === ""
+              ? "Create profile"
+              : "Update profile"}
+          </Button>
         </form>
       </Form>
     </div>

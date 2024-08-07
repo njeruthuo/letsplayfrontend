@@ -1,10 +1,10 @@
 // Define the UserProfile interface
-interface UserProfile {
-  id: number;
+export interface UserProfile {
+  id: number | null;
   user: number; // Assuming this is the user ID
   dob: string; // Or Date if you're handling Date objects
   location: string;
-  gender: "MALE" | "FEMALE" | null;
+  gender: "M" | "F" | null;
   bio: string;
   phone: string; // Assuming phone numbers are stored as strings
 }
@@ -19,6 +19,7 @@ interface User {
 
 // Define the UserState interface
 export interface UserState {
+  isUpdatingProfile: boolean;
   isAuthenticated: boolean;
   isCreateAccountLoading: boolean;
   isLoginLoading: boolean;

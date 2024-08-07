@@ -1,7 +1,8 @@
 import { UserState } from "@/lib/types";
 
 export const store: UserState = {
-  isAuthenticated: true,
+  isUpdatingProfile: false,
+  isAuthenticated: false,
   isCreateAccountLoading: false,
   isLoginLoading: false,
   loginError: false,

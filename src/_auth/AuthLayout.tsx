@@ -6,7 +6,7 @@ const AuthLayout = () => {
 
   return (
     <section className="bg-auth_background_picture bg-cover bg-center h-screen flex justify-center items-center">
-      {state.isAuthenticated ? (
+      {state.isAuthenticated && state.user.username ? (
         <Navigate to={"/"} />
       ) : (
         <section className="sm:w-1/3 md:2/3 px-4">
