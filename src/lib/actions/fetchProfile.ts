@@ -1,10 +1,9 @@
 import axios from "axios";
+import { url } from "../context/url";
 
 export async function fetchProfile(id: number) {
   try {
-    const profileData = await axios.get(
-      `http://localhost:8000/users/api/profile-data/${id}/`
-    );
+    const profileData = await axios.get(`${url}/users/api/profile-data/${id}/`);
 
     return profileData.data;
   } catch (error) {

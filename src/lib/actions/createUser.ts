@@ -1,4 +1,5 @@
 import axios from "axios";
+import { url } from "../context/url";
 
 export async function createUserAccount(user: {
   username: string;
@@ -8,16 +9,13 @@ export async function createUserAccount(user: {
   password: string;
 }) {
   try {
-    const response = await axios.post(
-      "http://localhost:8000/users/api/register/",
-      {
-        username: user.username,
-        email: user.email,
-        first_name: user.firstname,
-        last_name: user.lastname,
-        password: user.password,
-      }
-    );
+    const response = await axios.post(`${url}/users/api/register/`, {
+      username: user.username,
+      email: user.email,
+      first_name: user.firstname,
+      last_name: user.lastname,
+      password: user.password,
+    });
     console.log("User created:", response.data);
   } catch (error) {
     console.error("Error creating user:", error);

@@ -1,4 +1,5 @@
 import axios from "axios";
+import { url } from "../context/url";
 
 export async function createProfile(values) {
   try {
@@ -16,7 +17,7 @@ export async function createProfile(values) {
 export async function updateProfile(id, values) {
   try {
     const profileInfo = await axios.patch(
-      `http://localhost:8000/users/api/profile/update/`,
+      `${url}/users/api/profile/update/`,
       values
     );
 

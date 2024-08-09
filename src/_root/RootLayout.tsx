@@ -12,9 +12,11 @@ const RootLayout = () => {
           <div className="bg-silver">
             <Navbar />
           </div>
-          <Outlet />
+          <div className="mx-auto w-[85%] mt-4">
+            <Outlet />
+          </div>
           <div className="bg-silver absolute bottom-0 w-full">
-            <Footer />
+            {/* <Footer /> */}
           </div>
         </section>
       ) : (

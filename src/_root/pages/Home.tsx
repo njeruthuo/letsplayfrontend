@@ -1,7 +1,11 @@
-import React from "react";
+import { ChatHome } from "../chatserver";
 
 const Home = () => {
-  return <div>Home</div>;
+  return (
+    <div className="">
+      <ChatHome />
+    </div>
+  );
 };
 
 export default Home;
