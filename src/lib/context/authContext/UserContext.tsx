@@ -1,5 +1,5 @@
-import { store } from "./store";
-import { createContext, useContext, useReducer } from "react";
+import { store as initialStore } from "./store";
+import { createContext, useContext, useReducer, useEffect } from "react";
 import {
   CREATE_USER,
   CREATE_USER_PROFILE,
@@ -10,58 +10,74 @@ import {
   LOAD_ON_PROFILE_UPDATE,
 } from "./actions";
 
-/***
- * TODO:
- * make changes to ensure that a user profile is created with user.
- * implement CRUD operations on users and profiles.
- *
- */
+// Keys for localStorage
+const STORAGE_KEY = "userContext";
 
 const UserContextProvider = createContext(undefined);
 
 export const useUserContext = () => useContext(UserContextProvider);
 
+// Reducer function
 function reducer(state, action) {
+  let newState;
   switch (action.type) {
     case CREATE_USER:
-      return { ...state, user: action.payload };
-
+      newState = { ...state, user: action.payload };
+      break;
     case CREATE_USER_SESSION:
-      return { ...state, isAuthenticated: true, user: action.payload };
-
+      newState = { ...state, isAuthenticated: true, user: action.payload };
+      break;
     case CREATE_USER_PROFILE:
-      return { ...state, user_profile: action.payload };
-
+      newState = { ...state, user_profile: action.payload };
+      break;
     case LOAD_ON_CREATE_USER:
-      return {
+      newState = {
         ...state,
         isCreateAccountLoading: !state.isCreateAccountLoading,
       };
-
+      break;
     case LOAD_ON_LOGIN_USER:
-      return {
+      newState = {
         ...state,
         isLoginLoading: !state.isLoginLoading,
       };
-
+      break;
     case LOAD_ON_PROFILE_UPDATE:
-      return {
+      newState = {
         ...state,
         isUpdatingProfile: !state.isUpdatingProfile,
       };
-
+      break;
     case DELETE_USER_SESSION:
-      return { ...state, user: {}, isAuthenticated: false };
-
+      newState = {
+        ...state,
+        user: {},
+        user_profile: {},
+        isAuthenticated: false,
+      };
+      break;
     default:
-      throw Error("Unknown action specified!");
+      throw new Error("Unknown action specified!");
   }
+
+  // Persist state to localStorage
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(newState));
+  return newState;
 }
 
-const UserContext = ({ children }) => {
-  const [state, dispatch] = useReducer(reducer, store);
+// Load state from localStorage or use initial state
+const loadStateFromStorage = () => {
+  const storedState = localStorage.getItem(STORAGE_KEY);
+  return storedState ? JSON.parse(storedState) : initialStore;
+};
 
-  console.log(state);
+const UserContext = ({ children }) => {
+  const [state, dispatch] = useReducer(reducer, loadStateFromStorage());
+
+  useEffect(() => {
+    // Whenever state changes, save it to localStorage
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }, [state]);
 
   return (
     <UserContextProvider.Provider value={{ state, dispatch }}>

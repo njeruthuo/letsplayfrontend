@@ -1,6 +1,11 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { useEffect } from "react";
+import MapPicker from "./MapPicker";
+
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -17,12 +22,13 @@ import {
   CREATE_USER_PROFILE,
   LOAD_ON_PROFILE_UPDATE,
 } from "@/lib/context/authContext/actions";
-import { createProfile } from "@/lib/actions/createProfile";
+import { createProfile, updateProfile } from "@/lib/actions/createProfile";
 import Loader from "@/components/shared/Loader";
+import { fetchProfile } from "@/lib/actions/fetchProfile";
 
 const formSchema = z.object({
   dob: z.string().min(2, {
-    message: "Username must be at least 2 characters.",
+    message: "Date of birth must be at least 2 characters.",
   }),
   bio: z.string().min(10, {
     message: "Bio must be at least 10 characters.",
@@ -40,28 +46,59 @@ const formSchema = z.object({
 
 const ProfileForm = () => {
   const { state, dispatch } = useUserContext();
-  // 1. Define your form.
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      bio: state.user_profile.bio,
-      dob: state.user_profile.dob,
-      location: state.user_profile.location,
+      bio: "",
+      dob: "",
+      location: "",
       gender: "",
-      phone: state.user_profile.phone,
+      phone: "",
     },
   });
 
-  // 2. Define a submit handler.
+  const { setValue } = form;
+
+  useEffect(() => {
+    async function loadProfile() {
+      try {
+        const data = await fetchProfile(state.user.id);
+        if (data) {
+          dispatch({ type: CREATE_USER_PROFILE, payload: data });
+          setValue("bio", data.bio);
+          setValue("dob", data.dob);
+          setValue("location", data.location);
+          setValue("gender", data.gender);
+          setValue("phone", data.phone);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    }
+
+    loadProfile();
+  }, [state.user.id, dispatch, setValue]);
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
     dispatch({ type: LOAD_ON_PROFILE_UPDATE });
 
-    console.log(values);
     try {
-      const profileData = await createProfile({
-        ...values,
-        user: state.user.id,
-      });
+      let profileData;
+
+      if (state.user_profile.dob) {
+        // Profile exists, update it
+        profileData = await updateProfile(state.user_profile.id, {
+          ...values,
+          user: state.user.id,
+        });
+      } else {
+        // Profile does not exist, create it
+        profileData = await createProfile({
+          ...values,
+          user: state.user.id,
+        });
+      }
 
       dispatch({ type: CREATE_USER_PROFILE, payload: profileData?.data });
     } catch (error) {
@@ -88,7 +125,6 @@ const ProfileForm = () => {
               </FormItem>
             )}
           />
-
           <FormField
             control={form.control}
             name="dob"
@@ -102,7 +138,6 @@ const ProfileForm = () => {
               </FormItem>
             )}
           />
-
           <FormField
             control={form.control}
             name="location"
@@ -117,20 +152,46 @@ const ProfileForm = () => {
             )}
           />
 
-          <FormField
+          {/* <FormField
             control={form.control}
-            name="gender"
+            name="location"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Gender</FormLabel>
+                <FormLabel>Location</FormLabel>
                 <FormControl>
-                  <Input type="text" {...field} />
+                  <MapPicker
+                    onLocationSelect={(location) => {
+                      field.onChange(`${location.lat}, ${location.lng}`);
+                    }}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
+          /> */}
+          <FormField
+            control={form.control}
+            name="gender"
+            render={({ field }) => (
+              <>
+                <RadioGroup
+                  value={field.value} // Set the selected value
+                  onValueChange={field.onChange} // Update the value when selection changes
+                  className="flex justify-around"
+                >
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="M" id="option-one" />
+                    <Label htmlFor="option-one">Male</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="F" id="option-two" />
+                    <Label htmlFor="option-two">Female</Label>
+                  </div>
+                </RadioGroup>
+                <FormMessage />
+              </>
+            )}
           />
-
           <FormField
             control={form.control}
             name="phone"
@@ -155,4 +216,5 @@ const ProfileForm = () => {
     </div>
   );
 };
+
 export default ProfileForm;
